@@ -1,6 +1,10 @@
-import type { UserInteraction } from '../types';
+import type { UserInteraction, SearchHistoryItem, BrowseHistoryItem } from '../types';
 
 const STORAGE_KEY = 'short_video_interaction';
+const SEARCH_HISTORY_KEY = 'short_video_search_history';
+const BROWSE_HISTORY_KEY = 'short_video_browse_history';
+const MAX_SEARCH_HISTORY = 20;
+const MAX_BROWSE_HISTORY = 100;
 
 const defaultInteraction: UserInteraction = {
   likedVideos: [],
@@ -27,6 +31,101 @@ export const saveInteraction = (interaction: UserInteraction): void => {
   } catch (e) {
     console.error('Failed to save interaction to storage', e);
   }
+};
+
+export const getSearchHistory = (): SearchHistoryItem[] => {
+  try {
+    const data = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('Failed to get search history from storage', e);
+  }
+  return [];
+};
+
+export const saveSearchHistory = (history: SearchHistoryItem[]): void => {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+  } catch (e) {
+    console.error('Failed to save search history to storage', e);
+  }
+};
+
+export const addSearchHistory = (keyword: string): SearchHistoryItem[] => {
+  const history = getSearchHistory();
+  const existingIndex = history.findIndex((item) => item.keyword === keyword);
+  if (existingIndex > -1) {
+    history.splice(existingIndex, 1);
+  }
+  history.unshift({
+    keyword,
+    timestamp: Date.now(),
+  });
+  const trimmedHistory = history.slice(0, MAX_SEARCH_HISTORY);
+  saveSearchHistory(trimmedHistory);
+  return trimmedHistory;
+};
+
+export const removeSearchHistory = (keyword: string): SearchHistoryItem[] => {
+  const history = getSearchHistory();
+  const filteredHistory = history.filter((item) => item.keyword !== keyword);
+  saveSearchHistory(filteredHistory);
+  return filteredHistory;
+};
+
+export const clearSearchHistory = (): SearchHistoryItem[] => {
+  saveSearchHistory([]);
+  return [];
+};
+
+export const getBrowseHistory = (): BrowseHistoryItem[] => {
+  try {
+    const data = localStorage.getItem(BROWSE_HISTORY_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('Failed to get browse history from storage', e);
+  }
+  return [];
+};
+
+export const saveBrowseHistory = (history: BrowseHistoryItem[]): void => {
+  try {
+    localStorage.setItem(BROWSE_HISTORY_KEY, JSON.stringify(history));
+  } catch (e) {
+    console.error('Failed to save browse history to storage', e);
+  }
+};
+
+export const addBrowseHistory = (videoId: string, progress: number = 0): BrowseHistoryItem[] => {
+  const history = getBrowseHistory();
+  const existingIndex = history.findIndex((item) => item.videoId === videoId);
+  if (existingIndex > -1) {
+    history.splice(existingIndex, 1);
+  }
+  history.unshift({
+    videoId,
+    timestamp: Date.now(),
+    progress,
+  });
+  const trimmedHistory = history.slice(0, MAX_BROWSE_HISTORY);
+  saveBrowseHistory(trimmedHistory);
+  return trimmedHistory;
+};
+
+export const removeBrowseHistory = (videoId: string): BrowseHistoryItem[] => {
+  const history = getBrowseHistory();
+  const filteredHistory = history.filter((item) => item.videoId !== videoId);
+  saveBrowseHistory(filteredHistory);
+  return filteredHistory;
+};
+
+export const clearBrowseHistory = (): BrowseHistoryItem[] => {
+  saveBrowseHistory([]);
+  return [];
 };
 
 export const toggleLikeVideo = (videoId: string): boolean => {

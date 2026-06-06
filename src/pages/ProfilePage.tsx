@@ -1,27 +1,50 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Settings, Grid3X3, Heart, Bookmark, UserPlus, Users, UserCheck, Edit, LogOut, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Settings, Grid3X3, Heart, Bookmark, UserPlus, Edit, History, Trash2, X } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { useVideoStore } from '../store/useVideoStore';
-import { getVideosByUserId } from '../data/videos';
-import { formatNumber } from '../utils/format';
+import { useSearchStore } from '../store/useSearchStore';
+import { getVideosByUserId, getVideoById } from '../data/videos';
+import { formatNumber, formatDate } from '../utils/format';
+import type { Video } from '../types';
 
-type TabType = 'works' | 'collects' | 'likes';
+type TabType = 'works' | 'collects' | 'likes' | 'history';
 type MenuType = 'following' | 'followers' | 'collections' | null;
+
+interface HistoryVideo extends Video {
+  browseTimestamp: number;
+  browseProgress: number;
+}
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { currentUser, interaction, isVideoLiked, isVideoCollected } = useUserStore();
   const { videos, setCurrentIndex, setPlaying } = useVideoStore();
+  const { browseHistory, initBrowseHistory, clearAllBrowseHistory, removeFromBrowseHistory } = useSearchStore();
   
   const [activeTab, setActiveTab] = useState<TabType>('works');
   const [showMenu, setShowMenu] = useState<MenuType>(null);
+  const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
 
   const myVideos = getVideosByUserId('user-1');
+
+  useEffect(() => {
+    initBrowseHistory();
+  }, [initBrowseHistory]);
 
   const handleBack = useCallback(() => {
     navigate('/');
   }, [navigate]);
+
+  const handleClearHistory = useCallback(() => {
+    clearAllBrowseHistory();
+    setShowClearHistoryConfirm(false);
+  }, [clearAllBrowseHistory]);
+
+  const handleRemoveHistoryItem = useCallback((e: React.MouseEvent, videoId: string) => {
+    e.stopPropagation();
+    removeFromBrowseHistory(videoId);
+  }, [removeFromBrowseHistory]);
 
   const handleVideoClick = useCallback((videoId: string) => {
     const globalIndex = videos.findIndex(v => v.id === videoId);
@@ -44,6 +67,7 @@ export const ProfilePage = () => {
     { key: 'works', label: '作品', icon: <Grid3X3 className="w-5 h-5" /> },
     { key: 'collects', label: '收藏', icon: <Bookmark className="w-5 h-5" /> },
     { key: 'likes', label: '喜欢', icon: <Heart className="w-5 h-5" /> },
+    { key: 'history', label: '历史', icon: <History className="w-5 h-5" /> },
   ];
 
   const getDisplayVideos = () => {
@@ -58,6 +82,18 @@ export const ProfilePage = () => {
         return myVideos;
     }
   };
+
+  const historyVideos: HistoryVideo[] = browseHistory
+    .map(item => {
+      const video = getVideoById(item.videoId);
+      if (!video) return null;
+      return {
+        ...video,
+        browseTimestamp: item.timestamp,
+        browseProgress: item.progress,
+      };
+    })
+    .filter((item): item is HistoryVideo => item !== null);
 
   const displayVideos = getDisplayVideos();
   const followingList = interaction.followingUsers;
@@ -225,37 +261,136 @@ export const ProfilePage = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-0.5 p-0.5">
-        {displayVideos.length === 0 ? (
-          <div className="col-span-3 py-20 flex flex-col items-center justify-center">
-            <Grid3X3 className="w-16 h-16 text-gray-700 mb-4" />
-            <p className="text-gray-500 text-sm">
-              {activeTab === 'works' ? '暂无作品，快去发布吧' : 
-               activeTab === 'collects' ? '暂无收藏作品' : '暂无喜欢的作品'}
-            </p>
-          </div>
-        ) : (
-          displayVideos.map((video) => (
-            <div
-              key={video.id}
-              className="relative aspect-[9/16] bg-gray-800 cursor-pointer overflow-hidden"
-              onClick={() => handleVideoClick(video.id)}
-            >
-              <img
-                src={video.coverUrl}
-                alt={video.description}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                <div className="flex items-center gap-1 text-white text-xs">
-                  <Heart className="w-3 h-3" fill="white" />
-                  <span>{formatNumber(video.likeCount)}</span>
+      {activeTab === 'history' && historyVideos.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+          <span className="text-gray-400 text-sm">共 {historyVideos.length} 条浏览记录</span>
+          <button
+            onClick={() => setShowClearHistoryConfirm(true)}
+            className="text-gray-500 text-sm hover:text-gray-400 transition-colors"
+          >
+            清空历史
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'history' ? (
+        <div className="p-4">
+          {historyVideos.length === 0 ? (
+            <div className="py-20 flex flex-col items-center justify-center">
+              <History className="w-16 h-16 text-gray-700 mb-4" />
+              <p className="text-gray-500 text-sm">暂无浏览记录</p>
+              <p className="text-gray-600 text-xs mt-2">去看看精彩视频吧</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {historyVideos.map((video) => (
+                <div
+                  key={video.id}
+                  className="flex gap-3 p-3 bg-gray-900/50 rounded-lg cursor-pointer hover:bg-gray-900 transition-colors"
+                  onClick={() => handleVideoClick(video.id)}
+                >
+                  <div className="relative w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden">
+                    <img
+                      src={video.coverUrl}
+                      alt={video.description}
+                      className="w-full h-full object-cover"
+                    />
+                    {video.browseProgress > 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                        <div
+                          className="h-full bg-red-500"
+                          style={{ width: `${Math.min(video.browseProgress, 100)}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                    <p className="text-white text-sm line-clamp-2 leading-relaxed">
+                      {video.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 text-gray-500 text-xs">
+                      <span>@{video.author?.username}</span>
+                      <span>·</span>
+                      <span>{formatNumber(video.likeCount)} 赞</span>
+                    </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600 text-xs">
+                          {formatDate(new Date(video.browseTimestamp).toISOString())}
+                        </span>
+                        <button
+                          onClick={(e) => handleRemoveHistoryItem(e, video.id)}
+                          className="p-1 rounded-full hover:bg-gray-800 transition-colors"
+                        >
+                          <X className="w-4 h-4 text-gray-600 hover:text-gray-400" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-0.5 p-0.5">
+          {displayVideos.length === 0 ? (
+            <div className="col-span-3 py-20 flex flex-col items-center justify-center">
+              <Grid3X3 className="w-16 h-16 text-gray-700 mb-4" />
+              <p className="text-gray-500 text-sm">
+                {activeTab === 'works' ? '暂无作品，快去发布吧' :
+                 activeTab === 'collects' ? '暂无收藏作品' : '暂无喜欢的作品'}
+              </p>
+            </div>
+          ) : (
+            displayVideos.map((video) => (
+              <div
+                key={video.id}
+                className="relative aspect-[9/16] bg-gray-800 cursor-pointer overflow-hidden"
+                onClick={() => handleVideoClick(video.id)}
+              >
+                <img
+                  src={video.coverUrl}
+                  alt={video.description}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                  <div className="flex items-center gap-1 text-white text-xs">
+                    <Heart className="w-3 h-3" fill="white" />
+                    <span>{formatNumber(video.likeCount)}</span>
+                  </div>
                 </div>
               </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {showClearHistoryConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 animate-fade-in">
+          <div className="w-[80%] max-w-sm bg-gray-900 rounded-2xl p-6 animate-scale-in">
+            <div className="text-center mb-4">
+              <Trash2 className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+              <h3 className="text-white font-semibold text-lg">确定清空浏览历史？</h3>
+              <p className="text-gray-500 text-sm mt-2">清空后将无法恢复</p>
             </div>
-          ))
-        )}
-      </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowClearHistoryConfirm(false)}
+                className="flex-1 py-3 bg-gray-800 text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleClearHistory}
+                className="flex-1 py-3 bg-red-500 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-colors"
+              >
+                确定
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

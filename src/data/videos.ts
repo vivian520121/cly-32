@@ -89,3 +89,12 @@ export const getVideoById = (id: string): Video | undefined => {
 export const getVideosByUserId = (userId: string): Video[] => {
   return videos.filter((video) => video.userId === userId);
 };
+
+export const searchVideos = (keyword: string): Video[] => {
+  const lowerKeyword = keyword.toLowerCase();
+  return videos.filter((video) =>
+    video.description.toLowerCase().includes(lowerKeyword) ||
+    video.musicName.toLowerCase().includes(lowerKeyword) ||
+    video.author.username.toLowerCase().includes(lowerKeyword)
+  );
+};

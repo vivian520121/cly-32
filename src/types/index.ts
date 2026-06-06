@@ -70,3 +70,21 @@ export interface SwipeState {
   isDragging: boolean;
   direction: SwipeDirection;
 }
+
+export interface SearchHistoryItem {
+  keyword: string;
+  timestamp: number;
+}
+
+export interface BrowseHistoryItem {
+  videoId: string;
+  timestamp: number;
+  progress: number;
+}
+
+export interface HotSearchItem {
+  keyword: string;
+  hot: number;
+  isHot?: boolean;
+  isNew?: boolean;
+}

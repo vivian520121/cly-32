@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Settings, User } from 'lucide-react';
+import { Volume2, VolumeX, User, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { VideoPlayer } from './VideoPlayer';
 import { ActionBar } from './ActionBar';
@@ -7,19 +7,22 @@ import { ProgressBar } from './ProgressBar';
 import { SpeedControl } from './SpeedControl';
 import { useVideoStore } from '../store/useVideoStore';
 import { useUIStore } from '../store/useUIStore';
+import { useSearchStore } from '../store/useSearchStore';
 import { useSwipe } from '../hooks/useSwipe';
 import type { SwipeDirection } from '../types';
 
 export const VideoFeed = () => {
   const navigate = useNavigate();
-  const { videos, currentIndex, isPlaying, playbackRate, nextVideo, prevVideo, toggleMute, isMuted, setPlaying } = useVideoStore();
+  const { videos, currentIndex, isPlaying, playbackRate, nextVideo, prevVideo, toggleMute, isMuted, currentTime, duration } = useVideoStore();
   const { showSpeedControl, showControls, setShowSpeedControl, toggleControls, setShowControls } = useUIStore();
+  const { initBrowseHistory, addToBrowseHistory } = useSearchStore();
   
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   
   const hideControlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRecordedVideoId = useRef<string | null>(null);
 
   const resetHideControlsTimer = useCallback(() => {
     if (hideControlsTimeoutRef.current) {
@@ -104,6 +107,24 @@ export const VideoFeed = () => {
     navigate('/profile');
   }, [navigate]);
 
+  const handleSearchClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate('/search');
+  }, [navigate]);
+
+  useEffect(() => {
+    initBrowseHistory();
+  }, [initBrowseHistory]);
+
+  useEffect(() => {
+    const currentVideo = videos[currentIndex];
+    if (currentVideo && currentVideo.id !== lastRecordedVideoId.current) {
+      const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+      addToBrowseHistory(currentVideo.id, progress);
+      lastRecordedVideoId.current = currentVideo.id;
+    }
+  }, [currentIndex, videos, currentTime, duration, addToBrowseHistory]);
+
   useEffect(() => {
     resetHideControlsTimer();
     return () => {
@@ -175,12 +196,20 @@ export const VideoFeed = () => {
               <span className="text-white font-semibold text-lg">推荐</span>
               <span className="text-white/60 text-sm">关注</span>
             </div>
-            <button 
-              className="pointer-events-auto p-2 rounded-full hover:bg-white/10 transition-colors"
-              onClick={handleProfileClick}
-            >
-              <User className="w-6 h-6 text-white" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                className="pointer-events-auto p-2 rounded-full hover:bg-white/10 transition-colors"
+                onClick={handleSearchClick}
+              >
+                <Search className="w-6 h-6 text-white" />
+              </button>
+              <button 
+                className="pointer-events-auto p-2 rounded-full hover:bg-white/10 transition-colors"
+                onClick={handleProfileClick}
+              >
+                <User className="w-6 h-6 text-white" />
+              </button>
+            </div>
           </div>
         </div>
 
