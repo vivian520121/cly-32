@@ -88,3 +88,61 @@ export interface HotSearchItem {
   isHot?: boolean;
   isNew?: boolean;
 }
+
+export enum MessageType {
+  LIKE = 'like',
+  COMMENT_REPLY = 'comment_reply',
+}
+
+export interface LikeContent {
+  videoId: string;
+  videoCover: string;
+  videoDescription: string;
+}
+
+export interface CommentReplyContent {
+  videoId: string;
+  videoCover: string;
+  originalCommentId: string;
+  originalCommentContent: string;
+  replyContent: string;
+}
+
+export type MessageContent = LikeContent | CommentReplyContent;
+
+export interface Message {
+  id: string;
+  type: MessageType;
+  senderId: string;
+  sender: User;
+  receiverId: string;
+  content: MessageContent;
+  resourceUrl: string;
+  createdAt: string;
+  isRead: boolean;
+}
+
+export interface MessageState {
+  messages: Message[];
+  unreadCount: number;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  hasMore: boolean;
+  currentPage: number;
+  activeTab: MessageType | 'all';
+  isConnected: boolean;
+}
+
+export interface MessageStore extends MessageState {
+  setActiveTab: (tab: MessageType | 'all') => void;
+  fetchMessages: (page?: number, tab?: MessageType | 'all') => Promise<void>;
+  refreshMessages: () => Promise<void>;
+  loadMoreMessages: () => Promise<void>;
+  markAsRead: (messageId: string) => void;
+  markAllAsRead: () => void;
+  deleteMessage: (messageId: string) => void;
+  addMessage: (message: Message) => void;
+  setConnected: (connected: boolean) => void;
+  getFilteredMessages: () => Message[];
+  getUnreadCountByType: (type: MessageType) => number;
+}

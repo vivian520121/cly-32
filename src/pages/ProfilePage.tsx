@@ -6,6 +6,7 @@ import { useVideoStore } from '../store/useVideoStore';
 import { useSearchStore } from '../store/useSearchStore';
 import { getVideosByUserId, getVideoById } from '../data/videos';
 import { formatNumber, formatDate } from '../utils/format';
+import { UnreadBadge } from '../components/UnreadBadge';
 import type { Video } from '../types';
 
 type TabType = 'works' | 'collects' | 'likes' | 'history';
@@ -194,6 +195,12 @@ export const ProfilePage = () => {
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => navigate('/messages')}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors relative"
+            >
+              <UnreadBadge />
+            </button>
             <button className="p-2 rounded-full hover:bg-white/10 transition-colors">
               <Edit className="w-5 h-5 text-white" />
             </button>
