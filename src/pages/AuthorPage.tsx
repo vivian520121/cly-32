@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Share2, Grid3X3, Heart, Bookmark, UserPlus, Check, Settings } from 'lucide-react';
 import { getUserById } from '../data/users';
 import { getVideosByUserId } from '../data/videos';
@@ -12,6 +13,7 @@ type TabType = 'works' | 'likes' | 'collects';
 export const AuthorPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { followUser, isUserFollowed, isVideoLiked, isVideoCollected } = useUserStore();
   const { setCurrentIndex, setPlaying } = useVideoStore();
   
@@ -43,16 +45,16 @@ export const AuthorPage = () => {
   if (!author) {
     return (
       <div className="w-full h-screen bg-black flex items-center justify-center">
-        <p className="text-white">用户不存在</p>
+        <p className="text-white">{t('common.userDoesNotExist')}</p>
       </div>
     );
   }
 
-  const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
-    { key: 'works', label: '作品', icon: <Grid3X3 className="w-5 h-5" /> },
-    { key: 'likes', label: '喜欢', icon: <Heart className="w-5 h-5" /> },
-    { key: 'collects', label: '收藏', icon: <Bookmark className="w-5 h-5" /> },
-  ];
+  const tabs = useMemo<{ key: TabType; label: string; icon: React.ReactNode }[]>(() => [
+    { key: 'works', label: t('common.works'), icon: <Grid3X3 className="w-5 h-5" /> },
+    { key: 'likes', label: t('common.likes'), icon: <Heart className="w-5 h-5" /> },
+    { key: 'collects', label: t('common.collects'), icon: <Bookmark className="w-5 h-5" /> },
+  ], [t]);
 
   const getDisplayVideos = () => {
     switch (activeTab) {
@@ -95,7 +97,7 @@ export const AuthorPage = () => {
           />
           <div className="flex-1">
             <h2 className="text-white font-bold text-xl">{author.username}</h2>
-            <p className="text-gray-400 text-sm mt-1">抖音号: {author.id}</p>
+            <p className="text-gray-400 text-sm mt-1">{t('author.douyinId')} {author.id}</p>
             <p className="text-white/80 text-sm mt-2 leading-relaxed">{author.bio}</p>
           </div>
         </div>
@@ -103,15 +105,15 @@ export const AuthorPage = () => {
         <div className="flex items-center justify-around mt-6 py-3 border-y border-gray-800">
           <div className="text-center">
             <p className="text-white font-bold text-lg">{formatNumber(author.followingCount)}</p>
-            <p className="text-gray-400 text-xs mt-1">关注</p>
+            <p className="text-gray-400 text-xs mt-1">{t('common.following')}</p>
           </div>
           <div className="text-center">
             <p className="text-white font-bold text-lg">{formatNumber(author.followerCount)}</p>
-            <p className="text-gray-400 text-xs mt-1">粉丝</p>
+            <p className="text-gray-400 text-xs mt-1">{t('author.followersCount', { count: formatNumber(author.followerCount) })}</p>
           </div>
           <div className="text-center">
             <p className="text-white font-bold text-lg">{formatNumber(author.likeCount)}</p>
-            <p className="text-gray-400 text-xs mt-1">获赞</p>
+            <p className="text-gray-400 text-xs mt-1">{t('common.likesReceived')}</p>
           </div>
         </div>
 
@@ -125,13 +127,13 @@ export const AuthorPage = () => {
             }`}
           >
             {isFollowed ? (
-              <><Check className="w-4 h-4" /> 已关注</>
+              <><Check className="w-4 h-4" /> {t('common.followed')}</>
             ) : (
-              <><UserPlus className="w-4 h-4" /> 关注</>
+              <><UserPlus className="w-4 h-4" /> {t('common.follow')}</>
             )}
           </button>
           <button className="px-6 py-3 rounded-xl bg-gray-800 text-white font-semibold text-sm hover:bg-gray-700 transition-colors">
-            私信
+            {t('common.message')}
           </button>
         </div>
       </div>
@@ -159,8 +161,8 @@ export const AuthorPage = () => {
           <div className="col-span-3 py-20 flex flex-col items-center justify-center">
             <Settings className="w-16 h-16 text-gray-700 mb-4" />
             <p className="text-gray-500 text-sm">
-              {activeTab === 'works' ? '暂无作品' : 
-               activeTab === 'likes' ? '暂无喜欢' : '暂无收藏'}
+              {activeTab === 'works' ? t('author.noWorks') : 
+               activeTab === 'likes' ? t('author.noLikes') : t('author.noCollects')}
             </p>
           </div>
         ) : (
@@ -183,7 +185,7 @@ export const AuthorPage = () => {
               </div>
               {index < 3 && (
                 <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded">
-                  热门
+                  {t('common.hotLabel')}
                 </div>
               )}
             </div>

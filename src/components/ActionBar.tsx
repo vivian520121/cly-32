@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, Share2, Music, UserPlus, Check } from 'lucide-react';
 import type { Video } from '../types';
@@ -13,6 +14,7 @@ interface ActionBarProps {
 }
 
 export const ActionBar = ({ video }: ActionBarProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { likeVideo, collectVideo, followUser, isVideoLiked, isVideoCollected, isUserFollowed } = useUserStore();
   const { updateVideoCount } = useVideoStore();
@@ -58,9 +60,9 @@ export const ActionBar = ({ video }: ActionBarProps) => {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制到剪贴板');
+      alert(t('video.linkCopied'));
     }
-  }, [video.id, video.description, updateVideoCount]);
+  }, [video.id, video.description, updateVideoCount, t]);
 
   const handleAuthorClick = useCallback(() => {
     navigate(`/author/${video.userId}`);

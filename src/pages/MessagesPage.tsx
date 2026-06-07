@@ -1,10 +1,12 @@
 import { ArrowLeft, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MessageTabs } from '../components/MessageTabs';
 import { MessageList } from '../components/MessageList';
 
 export const MessagesPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -16,7 +18,7 @@ export const MessagesPage = () => {
           >
             <ArrowLeft className="w-6 h-6 text-gray-700" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">消息中心</h1>
+          <h1 className="text-lg font-bold text-gray-900">{t('messages.title')}</h1>
           <button className="p-2 -mr-2 rounded-lg hover:bg-gray-100 transition-colors">
             <Settings className="w-6 h-6 text-gray-700" />
           </button>

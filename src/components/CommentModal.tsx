@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Heart, Send, ChevronDown, ChevronUp, MessageCircle, Loader2 } from 'lucide-react';
 import { useUIStore } from '../store/useUIStore';
 import { useUserStore } from '../store/useUserStore';
@@ -9,6 +10,7 @@ import { formatNumber, formatDate } from '../utils/format';
 import type { Comment } from '../types';
 
 export const CommentModal = () => {
+  const { t } = useTranslation();
   const { showCommentModal, currentVideoId, setShowCommentModal } = useUIStore();
   const { likeComment, isCommentLiked } = useUserStore();
   const { updateVideoCount, getCurrentVideo } = useVideoStore();
@@ -70,7 +72,6 @@ export const CommentModal = () => {
       });
     };
     
-    // 直接更新 items 状态（实际项目中应该通过 store 更新）
     console.log('Update comment like count');
   }, [isCommentLiked, likeComment]);
 
@@ -146,7 +147,7 @@ export const CommentModal = () => {
                   className="text-gray-400 text-xs hover:text-white transition-colors flex items-center gap-1"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
-                  回复
+                  {t('comment.reply')}
                 </button>
               )}
               <button 
@@ -167,9 +168,9 @@ export const CommentModal = () => {
                 className="flex items-center gap-1 text-gray-400 text-xs mt-2 hover:text-white transition-colors"
               >
                 {isExpanded ? (
-                  <><ChevronUp className="w-4 h-4" /> 收起 {comment.replyCount} 条回复</>
+                  <><ChevronUp className="w-4 h-4" /> {t('comment.collapseReplies', { count: comment.replyCount })}</>
                 ) : (
-                  <><ChevronDown className="w-4 h-4" /> 查看 {comment.replyCount} 条回复</>
+                  <><ChevronDown className="w-4 h-4" /> {t('comment.viewReplies', { count: comment.replyCount })}</>
                 )}
               </button>
             )}
@@ -202,7 +203,7 @@ export const CommentModal = () => {
         <div className="sticky top-0 bg-gray-900 z-10 px-4 py-3 border-b border-gray-800">
           <div className="flex items-center justify-between">
             <h3 className="text-white font-semibold text-base">
-              {currentVideo ? `${formatNumber(currentVideo.commentCount)} 条评论` : '评论'}
+              {currentVideo ? t('comment.commentsCount', { count: currentVideo.commentCount }) : t('comment.comments')}
             </h3>
             <button 
               onClick={handleClose}
@@ -221,7 +222,7 @@ export const CommentModal = () => {
           {items.length === 0 && !isLoading && (
             <div className="flex flex-col items-center justify-center py-16">
               <MessageCircle className="w-16 h-16 text-gray-600 mb-4" />
-              <p className="text-gray-500 text-sm">暂无评论，快来抢沙发吧</p>
+              <p className="text-gray-500 text-sm">{t('comment.noComments')}</p>
             </div>
           )}
           
@@ -233,11 +234,11 @@ export const CommentModal = () => {
             {isLoading && (
               <div className="flex items-center gap-2 text-gray-500">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm">加载中...</span>
+                <span className="text-sm">{t('comment.loading')}</span>
               </div>
             )}
             {!hasMore && items.length > 0 && (
-              <p className="text-gray-600 text-sm">没有更多评论了</p>
+              <p className="text-gray-600 text-sm">{t('comment.noMoreComments')}</p>
             )}
           </div>
         </div>
@@ -246,13 +247,13 @@ export const CommentModal = () => {
           {replyTo && (
             <div className="flex items-center gap-2 mb-2">
               <span className="text-gray-400 text-xs">
-                回复 @{replyTo.username}
+                {t('comment.replyTo', { username: replyTo.username })}
               </span>
               <button 
                 onClick={handleCancelReply}
                 className="text-gray-500 hover:text-white text-xs"
               >
-                取消
+                {t('common.cancel')}
               </button>
             </div>
           )}
@@ -263,7 +264,7 @@ export const CommentModal = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              placeholder={replyTo ? `回复 @${replyTo.username}...` : '说点什么...'}
+              placeholder={replyTo ? t('comment.replyPlaceholder', { username: replyTo.username }) : t('comment.placeholder')}
               className="flex-1 bg-gray-800 text-white text-sm px-4 py-2.5 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500/50 placeholder-gray-500"
             />
             <button 

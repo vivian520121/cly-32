@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search, ArrowLeft, X, Clock, TrendingUp, Trash2, Heart, ChevronLeft } from 'lucide-react';
 import { useSearchStore } from '../store/useSearchStore';
 import { useVideoStore } from '../store/useVideoStore';
@@ -9,6 +10,7 @@ type SearchView = 'suggestion' | 'result';
 
 export const SearchPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     searchHistory,
     hotSearches,
@@ -121,7 +123,7 @@ export const SearchPage = () => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               onFocus={handleInputFocus}
-              placeholder="搜索视频、用户、音乐"
+              placeholder={t('search.placeholder')}
               className="w-full h-10 pl-10 pr-10 bg-gray-900 text-white text-sm rounded-full outline-none focus:ring-2 focus:ring-red-500/50 placeholder:text-gray-500"
               autoFocus
             />
@@ -138,7 +140,7 @@ export const SearchPage = () => {
             onClick={handleSearch}
             className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-full hover:bg-red-600 transition-colors"
           >
-            搜索
+            {t('search.searchButton')}
           </button>
         </div>
       </div>
@@ -150,13 +152,13 @@ export const SearchPage = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-gray-400" />
-                  <span className="text-white font-semibold">搜索历史</span>
+                  <span className="text-white font-semibold">{t('search.searchHistory')}</span>
                 </div>
                 <button
                   onClick={() => setShowClearConfirm(true)}
                   className="text-gray-500 text-sm hover:text-gray-400 transition-colors"
                 >
-                  清空
+                  {t('search.clearHistory')}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -182,7 +184,7 @@ export const SearchPage = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-5 h-5 text-red-500" />
-              <span className="text-white font-semibold">热门热搜</span>
+              <span className="text-white font-semibold">{t('search.hotSearches')}</span>
             </div>
             <div className="space-y-3">
               {hotSearches.slice(0, 10).map((item, index) => (
@@ -207,17 +209,17 @@ export const SearchPage = () => {
                       </span>
                       {item.isHot && (
                         <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-xs rounded">
-                          热
+                          {t('common.hot')}
                         </span>
                       )}
                       {item.isNew && (
                         <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-xs rounded">
-                          新
+                          {t('common.new')}
                         </span>
                       )}
                     </div>
                     <span className="text-gray-500 text-xs">
-                      {formatNumber(item.hot)} 热度
+                      {t('search.hotValue', { count: formatNumber(item.hot) })}
                     </span>
                   </div>
                 </div>
@@ -229,29 +231,27 @@ export const SearchPage = () => {
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-gray-400 text-sm">找到</span>
-              <span className="text-white font-semibold">{searchResults.length}</span>
-              <span className="text-gray-400 text-sm">个相关视频</span>
+              <span className="text-gray-400 text-sm">{t('search.searchResultCount', { count: searchResults.length })}</span>
             </div>
             <button
               onClick={handleBackToSuggestion}
               className="text-gray-500 text-sm hover:text-gray-400 transition-colors flex items-center gap-1"
             >
               <ChevronLeft className="w-4 h-4" />
-              换个关键词
+              {t('search.changeKeyword')}
             </button>
           </div>
 
           {isSearching ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-10 h-10 border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-4" />
-              <p className="text-gray-500 text-sm">搜索中...</p>
+              <p className="text-gray-500 text-sm">{t('search.searching')}</p>
             </div>
           ) : searchResults.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Search className="w-16 h-16 text-gray-700 mb-4" />
-              <p className="text-gray-500 text-sm">没有找到相关视频</p>
-              <p className="text-gray-600 text-xs mt-2">换个关键词试试吧</p>
+              <p className="text-gray-500 text-sm">{t('search.noResults')}</p>
+              <p className="text-gray-600 text-xs mt-2">{t('search.tryOtherKeyword')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-0.5">
@@ -285,21 +285,21 @@ export const SearchPage = () => {
           <div className="w-[80%] max-w-sm bg-gray-900 rounded-2xl p-6 animate-scale-in">
             <div className="text-center mb-4">
               <Trash2 className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-              <h3 className="text-white font-semibold text-lg">确定清空搜索历史？</h3>
-              <p className="text-gray-500 text-sm mt-2">清空后将无法恢复</p>
+              <h3 className="text-white font-semibold text-lg">{t('search.clearHistoryConfirmTitle')}</h3>
+              <p className="text-gray-500 text-sm mt-2">{t('search.clearHistoryConfirmDesc')}</p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearConfirm(false)}
                 className="flex-1 py-3 bg-gray-800 text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
               >
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleClearHistory}
                 className="flex-1 py-3 bg-red-500 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-colors"
               >
-                确定
+                {t('common.confirm')}
               </button>
             </div>
           </div>

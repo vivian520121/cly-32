@@ -1,5 +1,6 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings, Grid3X3, Heart, Bookmark, UserPlus, Edit, History, Trash2, X } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { useVideoStore } from '../store/useVideoStore';
@@ -19,6 +20,7 @@ interface HistoryVideo extends Video {
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { currentUser, interaction, isVideoLiked, isVideoCollected } = useUserStore();
   const { videos, setCurrentIndex, setPlaying } = useVideoStore();
   const { browseHistory, initBrowseHistory, clearAllBrowseHistory, removeFromBrowseHistory } = useSearchStore();
@@ -64,12 +66,12 @@ export const ProfilePage = () => {
     navigate(`/author/${userId}`);
   }, [navigate]);
 
-  const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
-    { key: 'works', label: '作品', icon: <Grid3X3 className="w-5 h-5" /> },
-    { key: 'collects', label: '收藏', icon: <Bookmark className="w-5 h-5" /> },
-    { key: 'likes', label: '喜欢', icon: <Heart className="w-5 h-5" /> },
-    { key: 'history', label: '历史', icon: <History className="w-5 h-5" /> },
-  ];
+  const tabs = useMemo<{ key: TabType; label: string; icon: React.ReactNode }[]>(() => [
+    { key: 'works', label: t('common.works'), icon: <Grid3X3 className="w-5 h-5" /> },
+    { key: 'collects', label: t('common.collects'), icon: <Bookmark className="w-5 h-5" /> },
+    { key: 'likes', label: t('common.likes'), icon: <Heart className="w-5 h-5" /> },
+    { key: 'history', label: t('common.history'), icon: <History className="w-5 h-5" /> },
+  ], [t]);
 
   const getDisplayVideos = () => {
     switch (activeTab) {
@@ -108,14 +110,14 @@ export const ProfilePage = () => {
             <button onClick={() => setShowMenu(null)} className="p-2">
               <ArrowLeft className="w-6 h-6 text-white" />
             </button>
-            <h2 className="text-white font-semibold text-lg">关注</h2>
+            <h2 className="text-white font-semibold text-lg">{t('common.following')}</h2>
             <div className="w-10" />
           </div>
           <div className="p-4">
             {followingList.length === 0 ? (
               <div className="py-20 text-center">
                 <UserPlus className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                <p className="text-gray-500 text-sm">还没有关注任何人</p>
+                <p className="text-gray-500 text-sm">{t('profile.noFollowing')}</p>
               </div>
             ) : (
               followingList.map(userId => {
@@ -126,10 +128,10 @@ export const ProfilePage = () => {
                     <img src={user.avatar} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                     <div className="flex-1">
                       <p className="text-white font-medium">{user.username}</p>
-                      <p className="text-gray-400 text-xs">{formatNumber(user.followerCount)} 粉丝</p>
+                      <p className="text-gray-400 text-xs">{t('profile.followersCount', { count: formatNumber(user.followerCount) })}</p>
                     </div>
                     <button className="px-4 py-1.5 bg-gray-800 text-gray-300 text-sm rounded-full">
-                      已关注
+                      {t('common.followed')}
                     </button>
                   </div>
                 );
@@ -147,7 +149,7 @@ export const ProfilePage = () => {
             <button onClick={() => setShowMenu(null)} className="p-2">
               <ArrowLeft className="w-6 h-6 text-white" />
             </button>
-            <h2 className="text-white font-semibold text-lg">粉丝</h2>
+            <h2 className="text-white font-semibold text-lg">{t('common.followers')}</h2>
             <div className="w-10" />
           </div>
           <div className="p-4">
@@ -169,7 +171,7 @@ export const ProfilePage = () => {
                         : 'bg-red-500 text-white'
                     }`}
                   >
-                    {isFollowed ? '已关注' : '关注'}
+                    {isFollowed ? t('common.followed') : t('common.follow')}
                   </button>
                 </div>
               );
@@ -223,10 +225,10 @@ export const ProfilePage = () => {
           />
           <div className="flex-1">
             <h2 className="text-white font-bold text-xl">{currentUser.username}</h2>
-            <p className="text-gray-400 text-sm mt-1">抖音号: {currentUser.id}</p>
+            <p className="text-gray-400 text-sm mt-1">{t('profile.douyinId')} {currentUser.id}</p>
             <p className="text-white/80 text-sm mt-2 leading-relaxed">{currentUser.bio}</p>
             <button className="mt-3 px-4 py-1.5 border border-gray-600 text-gray-300 text-xs rounded-full hover:bg-white/10 transition-colors">
-              编辑资料
+              {t('common.edit')}
             </button>
           </div>
         </div>
@@ -237,18 +239,18 @@ export const ProfilePage = () => {
             onClick={() => handleMenuClick('following')}
           >
             <p className="text-white font-bold text-lg">{formatNumber(followingList.length)}</p>
-            <p className="text-gray-400 text-xs mt-1">关注</p>
+            <p className="text-gray-400 text-xs mt-1">{t('common.following')}</p>
           </button>
           <button 
             className="text-center"
             onClick={() => handleMenuClick('followers')}
           >
             <p className="text-white font-bold text-lg">{formatNumber(followerList.length)}</p>
-            <p className="text-gray-400 text-xs mt-1">粉丝</p>
+            <p className="text-gray-400 text-xs mt-1">{t('common.followers')}</p>
           </button>
           <div className="text-center">
             <p className="text-white font-bold text-lg">{formatNumber(currentUser.likeCount)}</p>
-            <p className="text-gray-400 text-xs mt-1">获赞</p>
+            <p className="text-gray-400 text-xs mt-1">{t('common.likesReceived')}</p>
           </div>
         </div>
       </div>
@@ -273,12 +275,12 @@ export const ProfilePage = () => {
 
       {activeTab === 'history' && historyVideos.length > 0 && (
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-          <span className="text-gray-400 text-sm">共 {historyVideos.length} 条浏览记录</span>
+          <span className="text-gray-400 text-sm">{t('profile.browseHistoryCount', { count: historyVideos.length })}</span>
           <button
             onClick={() => setShowClearHistoryConfirm(true)}
             className="text-gray-500 text-sm hover:text-gray-400 transition-colors"
           >
-            清空历史
+            {t('profile.clearHistory')}
           </button>
         </div>
       )}
@@ -288,8 +290,8 @@ export const ProfilePage = () => {
           {historyVideos.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center">
               <History className="w-16 h-16 text-gray-700 mb-4" />
-              <p className="text-gray-500 text-sm">暂无浏览记录</p>
-              <p className="text-gray-600 text-xs mt-2">去看看精彩视频吧</p>
+              <p className="text-gray-500 text-sm">{t('profile.noHistory')}</p>
+              <p className="text-gray-600 text-xs mt-2">{t('profile.goWatchVideos')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -348,8 +350,8 @@ export const ProfilePage = () => {
             <div className="col-span-3 py-20 flex flex-col items-center justify-center">
               <Grid3X3 className="w-16 h-16 text-gray-700 mb-4" />
               <p className="text-gray-500 text-sm">
-                {activeTab === 'works' ? '暂无作品，快去发布吧' :
-                 activeTab === 'collects' ? '暂无收藏作品' : '暂无喜欢的作品'}
+                {activeTab === 'works' ? t('profile.noWorks') :
+                 activeTab === 'collects' ? t('profile.noCollects') : t('profile.noLikes')}
               </p>
             </div>
           ) : (
@@ -381,21 +383,21 @@ export const ProfilePage = () => {
           <div className="w-[80%] max-w-sm bg-gray-900 rounded-2xl p-6 animate-scale-in">
             <div className="text-center mb-4">
               <Trash2 className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-              <h3 className="text-white font-semibold text-lg">确定清空浏览历史？</h3>
-              <p className="text-gray-500 text-sm mt-2">清空后将无法恢复</p>
+              <h3 className="text-white font-semibold text-lg">{t('profile.clearHistoryConfirmTitle')}</h3>
+              <p className="text-gray-500 text-sm mt-2">{t('profile.clearHistoryConfirmDesc')}</p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearHistoryConfirm(false)}
                 className="flex-1 py-3 bg-gray-800 text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
               >
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleClearHistory}
                 className="flex-1 py-3 bg-red-500 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-colors"
               >
-                确定
+                {t('common.confirm')}
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Heart, MessageCircle, Trash2, Check } from 'lucide-react';
 import type { Message, LikeContent, CommentReplyContent } from '../types';
 import { useMessageStore } from '../store/useMessageStore';
@@ -10,6 +11,7 @@ interface MessageItemProps {
 }
 
 export const MessageItem = ({ message }: MessageItemProps) => {
+  const { t } = useTranslation();
   const [showActions, setShowActions] = useState(false);
   const markAsRead = useMessageStore((state) => state.markAsRead);
   const deleteMessage = useMessageStore((state) => state.deleteMessage);
@@ -89,7 +91,7 @@ export const MessageItem = ({ message }: MessageItemProps) => {
                       : 'bg-blue-100 text-blue-600'
                   )}
                 >
-                  {isLikeMessage ? '赞了你的作品' : '回复了你的评论'}
+                  {isLikeMessage ? t('messages.likedYourVideo') : t('messages.repliedToYourComment')}
                 </span>
                 {!message.isRead && (
                   <span className="inline-flex items-center">
@@ -110,7 +112,7 @@ export const MessageItem = ({ message }: MessageItemProps) => {
                 <button
                   onClick={handleMarkAsRead}
                   className="p-1.5 rounded-lg hover:bg-green-100 text-gray-400 hover:text-green-600 transition-colors"
-                  title="标为已读"
+                  title={t('common.markAsRead')}
                 >
                   <Check className="w-4 h-4" />
                 </button>
@@ -118,7 +120,7 @@ export const MessageItem = ({ message }: MessageItemProps) => {
               <button
                 onClick={handleDelete}
                 className="p-1.5 rounded-lg hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
-                title="删除"
+                title={t('common.delete')}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -130,7 +132,7 @@ export const MessageItem = ({ message }: MessageItemProps) => {
               <>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-600 line-clamp-2">
-                    <span className="text-gray-900">{message.sender.username}</span> 赞了你的作品：
+                    <span className="text-gray-900">{message.sender.username}</span> {t('messages.likedYourVideo')}：
                     <span className="ml-1">{likeContent.videoDescription}</span>
                   </p>
                 </div>
@@ -147,7 +149,7 @@ export const MessageItem = ({ message }: MessageItemProps) => {
                     {replyContent.replyContent}
                   </p>
                   <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
-                    <p className="text-xs text-gray-500 mb-1">你的评论：</p>
+                    <p className="text-xs text-gray-500 mb-1">{t('messages.yourComment')}</p>
                     <p className="text-sm text-gray-600 line-clamp-2">
                       {replyContent.originalCommentContent}
                     </p>

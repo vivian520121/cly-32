@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, Loader2, Inbox, Wifi, WifiOff } from 'lucide-react';
 import type { Message } from '../types';
 import { MessageItem } from './MessageItem';
@@ -8,6 +9,7 @@ import { fetchMessagesAPI } from '../data/messages';
 import { cn } from '../lib/utils';
 
 export const MessageList = () => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
@@ -102,7 +104,7 @@ export const MessageList = () => {
             onClick={markAllAsRead}
             className="text-sm text-blue-500 hover:text-blue-600 font-medium transition-colors"
           >
-            全部标为已读
+            {t('messages.markAllAsRead')}
           </button>
         )}
       </div>
@@ -130,10 +132,10 @@ export const MessageList = () => {
             <RefreshCw className="w-5 h-5" />
             <span>
               {isRefreshing
-                ? '刷新中...'
+                ? t('messages.refreshing')
                 : pullDistance > 60
-                ? '释放刷新'
-                : '下拉刷新'}
+                ? t('messages.releaseToRefresh')
+                : t('messages.pullToRefresh')}
             </span>
           </div>
         </div>
@@ -151,11 +153,11 @@ export const MessageList = () => {
                 {isLoading && (
                   <div className="flex items-center justify-center gap-2 text-gray-500">
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="text-sm">加载中...</span>
+                    <span className="text-sm">{t('comment.loading')}</span>
                   </div>
                 )}
                 {!hasMore && !isLoading && displayItems.length > 0 && (
-                  <p className="text-center text-sm text-gray-400">没有更多消息了</p>
+                  <p className="text-center text-sm text-gray-400">{t('messages.noMoreMessages')}</p>
                 )}
               </div>
             </>
@@ -167,6 +169,7 @@ export const MessageList = () => {
 };
 
 const ConnectionStatus = () => {
+  const { t } = useTranslation();
   const isConnected = useMessageStore((state) => state.isConnected);
 
   return (
@@ -174,12 +177,12 @@ const ConnectionStatus = () => {
       {isConnected ? (
         <>
           <Wifi className="w-4 h-4 text-green-500" />
-          <span className="text-xs text-green-600 font-medium">已连接</span>
+          <span className="text-xs text-green-600 font-medium">{t('messages.connected')}</span>
         </>
       ) : (
         <>
           <WifiOff className="w-4 h-4 text-gray-400" />
-          <span className="text-xs text-gray-500">连接中...</span>
+          <span className="text-xs text-gray-500">{t('messages.connecting')}</span>
         </>
       )}
     </div>
@@ -187,23 +190,22 @@ const ConnectionStatus = () => {
 };
 
 const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
       <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
         <Inbox className="w-12 h-12 text-gray-300" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-2">暂无消息</h3>
+      <h3 className="text-lg font-semibold text-gray-700 mb-2">{t('messages.noMessages')}</h3>
       <p className="text-sm text-gray-500 text-center mb-6">
-        还没有收到任何通知，
-        <br />
-        当有新消息时会在这里显示
+        {t('messages.noMessagesDesc')}
       </p>
       <button
         onClick={onRefresh}
         className="flex items-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors active:scale-95"
       >
         <RefreshCw className="w-4 h-4" />
-        刷新一下
+        {t('messages.refresh')}
       </button>
     </div>
   );

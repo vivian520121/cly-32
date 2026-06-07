@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { useVideoStore } from '../store/useVideoStore';
 import { useUIStore } from '../store/useUIStore';
@@ -6,6 +7,7 @@ import { useUIStore } from '../store/useUIStore';
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 export const SpeedControl = () => {
+  const { t } = useTranslation();
   const { playbackRate, setPlaybackRate } = useVideoStore();
   const { setShowSpeedControl } = useUIStore();
 
@@ -29,7 +31,7 @@ export const SpeedControl = () => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-semibold text-lg">播放速度</h3>
+          <h3 className="text-white font-semibold text-lg">{t('video.playbackSpeed')}</h3>
           <button 
             onClick={handleClose}
             className="text-gray-400 hover:text-white transition-colors p-1"
@@ -50,7 +52,7 @@ export const SpeedControl = () => {
               }`}
             >
               {speed}x
-              {speed === 1 && ' (正常)'}
+              {speed === 1 && ` ${t('video.normal')}`}
             </button>
           ))}
         </div>

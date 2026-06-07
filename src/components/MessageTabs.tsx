@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Heart, MessageCircle, Bell } from 'lucide-react';
 import { MessageType } from '../types';
 import { useMessageStore } from '../store/useMessageStore';
@@ -10,17 +12,18 @@ interface TabItem {
   icon: typeof Heart;
 }
 
-const tabs: TabItem[] = [
-  { key: 'all', label: '全部', icon: Bell },
-  { key: MessageType.LIKE, label: '点赞', icon: Heart },
-  { key: MessageType.COMMENT_REPLY, label: '回复', icon: MessageCircle },
-];
-
 export const MessageTabs = () => {
+  const { t } = useTranslation();
   const activeTab = useMessageStore((state) => state.activeTab);
   const setActiveTab = useMessageStore((state) => state.setActiveTab);
   const unreadCount = useMessageStore((state) => state.unreadCount);
   const getUnreadCountByType = useMessageStore((state) => state.getUnreadCountByType);
+
+  const tabs = useMemo<TabItem[]>(() => [
+    { key: 'all', label: t('messages.all'), icon: Bell },
+    { key: MessageType.LIKE, label: t('common.likes'), icon: Heart },
+    { key: MessageType.COMMENT_REPLY, label: t('messages.replies'), icon: MessageCircle },
+  ], [t]);
 
   return (
     <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3">
