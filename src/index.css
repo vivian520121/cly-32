@@ -26,6 +26,124 @@ html, body, #root {
   background-color: #000;
 }
 
+html.light, html.light body, html.light #root {
+  background-color: #f8f8f8;
+}
+
+html.light {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light .bg-black {
+  background-color: #f8f8f8;
+}
+
+html.light .bg-gray-900 {
+  background-color: #ffffff;
+}
+
+html.light .bg-gray-800 {
+  background-color: #f3f4f6;
+}
+
+html.light .bg-gray-800\/50,
+html.light .bg-gray-800\/30 {
+  background-color: rgba(243, 244, 246, 0.5);
+}
+
+html.light .bg-gray-900\/50,
+html.light .bg-gray-900\/30 {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+html.light .text-white {
+  color: #111827;
+}
+
+html.light .text-gray-300 {
+  color: #4b5563;
+}
+
+html.light .text-gray-400 {
+  color: #6b7280;
+}
+
+html.light .text-gray-500 {
+  color: #9ca3af;
+}
+
+html.light .border-gray-800 {
+  border-color: #e5e7eb;
+}
+
+html.light .border-gray-700 {
+  border-color: #d1d5db;
+}
+
+html.light .hover\:bg-gray-800\/50:hover {
+  background-color: rgba(243, 244, 246, 0.5);
+}
+
+html.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+html.light .hover\:bg-gray-800:hover {
+  background-color: #f3f4f6;
+}
+
+html.light .hover\:bg-gray-700:hover {
+  background-color: #e5e7eb;
+}
+
+html.light .from-black\/80 {
+  --tw-gradient-from: rgba(248, 248, 248, 0.8);
+}
+
+html.light .to-transparent {
+  --tw-gradient-to: transparent;
+}
+
+html.light .fill-white {
+  fill: #111827;
+}
+
+html.light .stroke-white {
+  stroke: #111827;
+}
+
+html.light .placeholder-gray-500::placeholder {
+  color: #9ca3af;
+}
+
+html.light input:-webkit-autofill,
+html.light input:-webkit-autofill:hover,
+html.light input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #111827;
+  -webkit-box-shadow: 0 0 0px 1000px #f3f4f6 inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+html.light .bg-red-500\/10 {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+html.light .bg-green-500\/10 {
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+html.light .bg-blue-500\/10 {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
 body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;

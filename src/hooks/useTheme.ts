@@ -1,29 +1,42 @@
-import { useState, useEffect } from 'react';
-
-type Theme = 'light' | 'dark';
+import { useEffect, useState } from 'react';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import type { ThemeMode } from '@/types';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      return savedTheme;
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  const { settings } = useSettingsStore();
+  const themeMode = settings.preferences.theme;
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
+    const resolveTheme = (mode: ThemeMode): 'light' | 'dark' => {
+      if (mode === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return mode;
+    };
+
+    const theme = resolveTheme(themeMode);
+    setResolvedTheme(theme);
+
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+      if (themeMode === 'system') {
+        const newTheme = e.matches ? 'dark' : 'light';
+        setResolvedTheme(newTheme);
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(newTheme);
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+  }, [themeMode]);
 
   return {
-    theme,
-    toggleTheme,
-    isDark: theme === 'dark'
+    theme: resolvedTheme,
+    isDark: resolvedTheme === 'dark',
   };
-} 
+}
