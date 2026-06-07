@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Monitor, Globe, Video, Volume2, Gauge, Zap } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { SettingGroup } from '@/components/settings/SettingGroup';
@@ -9,39 +10,40 @@ import { SettingSlider } from '@/components/settings/SettingSlider';
 import type { AppPreferences, ThemeMode, Language, VideoQuality } from '@/types';
 import { cn } from '@/lib/utils';
 
-const themeOptions: { value: ThemeMode; label: string; icon: React.ReactNode }[] = [
-  { value: 'light', label: '浅色', icon: <Sun className="w-4 h-4" /> },
-  { value: 'dark', label: '深色', icon: <Moon className="w-4 h-4" /> },
-  { value: 'system', label: '跟随系统', icon: <Monitor className="w-4 h-4" /> },
-];
-
-const languageOptions: { value: Language; label: string }[] = [
-  { value: 'zh-CN', label: '简体中文' },
-  { value: 'en-US', label: 'English' },
-  { value: 'ja-JP', label: '日本語' },
-];
-
-const qualityOptions: { value: VideoQuality; label: string }[] = [
-  { value: 'auto', label: '自动' },
-  { value: '360p', label: '流畅 360p' },
-  { value: '480p', label: '标清 480p' },
-  { value: '720p', label: '高清 720p' },
-  { value: '1080p', label: '超清 1080p' },
-];
-
-const speedOptions: { value: number; label: string }[] = [
-  { value: 0.25, label: '0.25x' },
-  { value: 0.5, label: '0.5x' },
-  { value: 0.75, label: '0.75x' },
-  { value: 1, label: '1x 正常' },
-  { value: 1.25, label: '1.25x' },
-  { value: 1.5, label: '1.5x' },
-  { value: 2, label: '2x' },
-];
-
 export const PreferencesSettingsPanel = () => {
+  const { t } = useTranslation();
   const { settings, updatePreferences, isSaving, saveSuccess } = useSettingsStore();
   const [localSettings, setLocalSettings] = useState<AppPreferences>(settings.preferences);
+
+  const themeOptions = useMemo<{ value: ThemeMode; label: string; icon: React.ReactNode }[]>(() => [
+    { value: 'light', label: t('settings.light'), icon: <Sun className="w-4 h-4" /> },
+    { value: 'dark', label: t('settings.dark'), icon: <Moon className="w-4 h-4" /> },
+    { value: 'system', label: t('settings.system'), icon: <Monitor className="w-4 h-4" /> },
+  ], [t]);
+
+  const languageOptions = useMemo<{ value: Language; label: string }[]>(() => [
+    { value: 'zh-CN', label: '简体中文' },
+    { value: 'en-US', label: 'English' },
+    { value: 'ja-JP', label: '日本語' },
+  ], []);
+
+  const qualityOptions = useMemo<{ value: VideoQuality; label: string }[]>(() => [
+    { value: 'auto', label: t('settings.auto') },
+    { value: '360p', label: '流畅 360p' },
+    { value: '480p', label: '标清 480p' },
+    { value: '720p', label: '高清 720p' },
+    { value: '1080p', label: '超清 1080p' },
+  ], [t]);
+
+  const speedOptions = useMemo<{ value: number; label: string }[]>(() => [
+    { value: 0.25, label: '0.25x' },
+    { value: 0.5, label: '0.5x' },
+    { value: 0.75, label: '0.75x' },
+    { value: 1, label: '1x Normal' },
+    { value: 1.25, label: '1.25x' },
+    { value: 1.5, label: '1.5x' },
+    { value: 2, label: '2x' },
+  ], []);
 
   useEffect(() => {
     setLocalSettings(settings.preferences);
@@ -57,11 +59,11 @@ export const PreferencesSettingsPanel = () => {
 
   return (
     <div>
-      <SettingGroup title="外观" description="自定义应用的视觉效果">
+      <SettingGroup title={t('settings.appearance')} description={t('settings.appearanceDesc')}>
         <SettingItem
           icon={<Globe className="w-5 h-5 text-gray-400" />}
-          title="主题模式"
-          description="选择您喜欢的显示模式"
+          title={t('settings.theme')}
+          description={t('settings.themeDesc')}
           rightElement={
             <div className="flex gap-1 bg-gray-800 rounded-lg p-1">
               {themeOptions.map((option) => (
@@ -86,8 +88,8 @@ export const PreferencesSettingsPanel = () => {
 
         <SettingItem
           icon={<Globe className="w-5 h-5 text-gray-400" />}
-          title="语言"
-          description="选择应用显示语言"
+          title={t('settings.language')}
+          description={t('settings.languageDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.language}
@@ -98,11 +100,11 @@ export const PreferencesSettingsPanel = () => {
         />
       </SettingGroup>
 
-      <SettingGroup title="播放设置" description="视频和音频播放相关选项">
+      <SettingGroup title={t('settings.playback')} description={t('settings.playbackDesc')}>
         <SettingItem
           icon={<Video className="w-5 h-5 text-gray-400" />}
-          title="默认画质"
-          description="视频播放的默认清晰度"
+          title={t('settings.videoQuality')}
+          description={t('settings.videoQualityDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.videoQuality}
@@ -114,8 +116,8 @@ export const PreferencesSettingsPanel = () => {
 
         <SettingItem
           icon={<Gauge className="w-5 h-5 text-gray-400" />}
-          title="播放速度"
-          description="默认视频播放速度"
+          title={t('settings.playbackSpeed')}
+          description={t('settings.playbackSpeedDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.playbackSpeed}
@@ -127,8 +129,8 @@ export const PreferencesSettingsPanel = () => {
 
         <SettingItem
           icon={<Video className="w-5 h-5 text-gray-400" />}
-          title="自动播放"
-          description="Wi-Fi 环境下自动播放视频"
+          title={t('settings.autoplay')}
+          description={t('settings.autoplayDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.autoPlay}
@@ -139,8 +141,8 @@ export const PreferencesSettingsPanel = () => {
 
         <SettingItem
           icon={<Zap className="w-5 h-5 text-gray-400" />}
-          title="移动网络自动播放"
-          description="使用移动数据时也自动播放"
+          title={t('settings.autoplayMobile')}
+          description={t('settings.autoplayMobileDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.autoPlayOnMobile}
@@ -151,8 +153,8 @@ export const PreferencesSettingsPanel = () => {
 
         <SettingItem
           icon={<Video className="w-5 h-5 text-gray-400" />}
-          title="显示字幕"
-          description="自动显示视频字幕"
+          title={t('settings.showCaptions')}
+          description={t('settings.showCaptionsDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.showCaptions}
@@ -162,11 +164,11 @@ export const PreferencesSettingsPanel = () => {
         />
       </SettingGroup>
 
-      <SettingGroup title="音频与触感" description="音量和反馈设置">
+      <SettingGroup title={t('settings.audio')} description={t('settings.audioDesc')}>
         <SettingItem
           icon={<Volume2 className="w-5 h-5 text-gray-400" />}
-          title="默认音量"
-          description="视频播放的默认音量"
+          title={t('settings.defaultVolume')}
+          description={t('settings.defaultVolumeDesc')}
           bordered={false}
         />
         <div className="py-4">
@@ -179,8 +181,8 @@ export const PreferencesSettingsPanel = () => {
 
         <SettingItem
           icon={<Zap className="w-5 h-5 text-gray-400" />}
-          title="触感反馈"
-          description="交互时提供震动反馈"
+          title={t('settings.hapticFeedback')}
+          description={t('settings.hapticFeedbackDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.enableHapticFeedback}
@@ -195,7 +197,7 @@ export const PreferencesSettingsPanel = () => {
           'mt-4 p-3 rounded-xl text-sm text-center',
           isSaving ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'
         )}>
-          {isSaving ? '保存中...' : '设置已自动保存'}
+          {isSaving ? t('common.saving') : t('settings.saveSuccess')}
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Mail, Phone, FileText, Camera, Check } from 'lucide-react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { SettingGroup } from '@/components/settings/SettingGroup';
@@ -8,6 +9,7 @@ import type { AccountSettings } from '@/types';
 import { cn } from '@/lib/utils';
 
 export const AccountSettingsPanel = () => {
+  const { t } = useTranslation();
   const { settings, updateAccountSettings, validateField, clearErrors, errors, isSaving } = useSettingsStore();
   const [localSettings, setLocalSettings] = useState<AccountSettings>(settings.account);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -66,12 +68,12 @@ export const AccountSettingsPanel = () => {
 
   return (
     <div>
-      <SettingGroup title="账户信息" description="管理您的基本资料和联系方式">
+      <SettingGroup title={t('settings.accountInfo')} description={t('settings.accountDesc')}>
         <div className="flex flex-col items-center mb-6 pb-6 border-b border-gray-800">
           <div className="relative">
             <img
               src={localSettings.avatar}
-              alt="头像"
+              alt={t('settings.avatar')}
               className="w-24 h-24 rounded-full object-cover border-4 border-gray-700"
             />
             <button
@@ -81,12 +83,12 @@ export const AccountSettingsPanel = () => {
               <Camera className="w-4 h-4 text-white" />
             </button>
           </div>
-          <p className="text-gray-500 text-sm mt-2">点击更换头像</p>
+          <p className="text-gray-500 text-sm mt-2">{t('settings.changeAvatar')}</p>
         </div>
 
         <SettingItem
           icon={<User className="w-5 h-5 text-gray-400" />}
-          title="用户名"
+          title={t('settings.username')}
           bordered={false}
           className="mb-4"
         />
@@ -94,7 +96,7 @@ export const AccountSettingsPanel = () => {
           value={localSettings.username}
           onChange={(v) => handleChange('username', v)}
           onBlur={() => handleBlur('username')}
-          placeholder="请输入用户名"
+          placeholder={t('settings.usernamePlaceholder')}
           error={fieldErrors.username}
           maxLength={20}
           showCount
@@ -103,7 +105,7 @@ export const AccountSettingsPanel = () => {
 
         <SettingItem
           icon={<User className="w-5 h-5 text-gray-400" />}
-          title="昵称"
+          title={t('settings.nickname')}
           bordered={false}
           className="mb-4"
         />
@@ -111,7 +113,7 @@ export const AccountSettingsPanel = () => {
           value={localSettings.nickname}
           onChange={(v) => handleChange('nickname', v)}
           onBlur={() => handleBlur('nickname')}
-          placeholder="请输入昵称"
+          placeholder={t('settings.nicknamePlaceholder')}
           error={fieldErrors.nickname}
           maxLength={30}
           showCount
@@ -120,7 +122,7 @@ export const AccountSettingsPanel = () => {
 
         <SettingItem
           icon={<FileText className="w-5 h-5 text-gray-400" />}
-          title="个人简介"
+          title={t('settings.bio')}
           bordered={false}
           className="mb-4"
         />
@@ -128,7 +130,7 @@ export const AccountSettingsPanel = () => {
           value={localSettings.bio}
           onChange={(v) => handleChange('bio', v)}
           onBlur={() => handleBlur('bio')}
-          placeholder="介绍一下自己吧"
+          placeholder={t('settings.bioPlaceholder')}
           error={fieldErrors.bio}
           maxLength={200}
           showCount
@@ -137,7 +139,7 @@ export const AccountSettingsPanel = () => {
 
         <SettingItem
           icon={<Mail className="w-5 h-5 text-gray-400" />}
-          title="邮箱"
+          title={t('settings.email')}
           bordered={false}
           className="mb-4"
         />
@@ -146,14 +148,14 @@ export const AccountSettingsPanel = () => {
           value={localSettings.email}
           onChange={(v) => handleChange('email', v)}
           onBlur={() => handleBlur('email')}
-          placeholder="请输入邮箱地址"
+          placeholder={t('settings.emailPlaceholder')}
           error={fieldErrors.email}
           className="mb-4"
         />
 
         <SettingItem
           icon={<Phone className="w-5 h-5 text-gray-400" />}
-          title="手机号"
+          title={t('settings.phone')}
           bordered={false}
           className="mb-4"
         />
@@ -162,7 +164,7 @@ export const AccountSettingsPanel = () => {
           value={localSettings.phone}
           onChange={(v) => handleChange('phone', v)}
           onBlur={() => handleBlur('phone')}
-          placeholder="请输入手机号码"
+          placeholder={t('settings.phonePlaceholder')}
           error={fieldErrors.phone}
           className="mb-4"
         />
@@ -182,12 +184,12 @@ export const AccountSettingsPanel = () => {
         {isSaving ? (
           <>
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            保存中...
+            {t('common.saving')}
           </>
         ) : (
           <>
             <Check className="w-4 h-4" />
-            保存更改
+            {t('settings.saveChanges')}
           </>
         )}
       </button>

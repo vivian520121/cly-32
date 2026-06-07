@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   Heart,
@@ -20,18 +21,19 @@ import { SettingInput } from '@/components/settings/SettingInput';
 import type { NotificationSettings, NotificationFrequency } from '@/types';
 import { cn } from '@/lib/utils';
 
-const frequencyOptions: { value: NotificationFrequency; label: string }[] = [
-  { value: 'always', label: '始终' },
-  { value: 'daily', label: '每日汇总' },
-  { value: 'weekly', label: '每周汇总' },
-  { value: 'never', label: '从不' },
-];
-
 export const NotificationSettingsPanel = () => {
+  const { t } = useTranslation();
   const { settings, updateNotificationSettings, validateField, errors, isSaving, saveSuccess } = useSettingsStore();
   const [localSettings, setLocalSettings] = useState<NotificationSettings>(settings.notifications);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const frequencyOptions = useMemo<{ value: NotificationFrequency; label: string }[]>(() => [
+    { value: 'always', label: t('settings.always') },
+    { value: 'daily', label: t('settings.daily') },
+    { value: 'weekly', label: t('settings.weekly') },
+    { value: 'never', label: t('settings.never') },
+  ], [t]);
 
   useEffect(() => {
     setLocalSettings(settings.notifications);
@@ -50,11 +52,11 @@ export const NotificationSettingsPanel = () => {
     }
     if (localSettings.quietHoursEnabled && localSettings.quietHoursStart && localSettings.quietHoursEnd) {
       if (localSettings.quietHoursStart === localSettings.quietHoursEnd) {
-        newErrors.quietHours = '开始时间和结束时间不能相同';
+        newErrors.quietHours = t('validation.quietHoursSameTime');
       }
     }
     setFieldErrors(newErrors);
-  }, [localSettings, touched, validateField]);
+  }, [localSettings, touched, validateField, t]);
 
   const handleChange = async <K extends keyof NotificationSettings>(
     field: K,
@@ -93,11 +95,11 @@ export const NotificationSettingsPanel = () => {
 
   return (
     <div>
-      <SettingGroup title="通知渠道" description="选择接收通知的方式">
+      <SettingGroup title={t('settings.notificationsTitle')} description={t('settings.notificationsDesc')}>
         <SettingItem
           icon={<Bell className="w-5 h-5 text-gray-400" />}
-          title="推送通知"
-          description="接收应用推送消息"
+          title={t('settings.pushNotifications')}
+          description={t('settings.pushNotificationsDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.pushEnabled}
@@ -108,8 +110,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<Mail className="w-5 h-5 text-gray-400" />}
-          title="邮件通知"
-          description="重要消息通过邮件告知"
+          title={t('settings.emailNotifications')}
+          description={t('settings.emailNotificationsDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.emailEnabled}
@@ -120,8 +122,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<Smartphone className="w-5 h-5 text-gray-400" />}
-          title="短信通知"
-          description="通过短信接收安全提醒"
+          title={t('settings.smsNotifications')}
+          description={t('settings.smsNotificationsDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.smsEnabled}
@@ -131,11 +133,11 @@ export const NotificationSettingsPanel = () => {
         />
       </SettingGroup>
 
-      <SettingGroup title="互动通知" description="管理各类互动消息">
+      <SettingGroup title={t('settings.interactionNotifications')} description={t('settings.interactionNotificationsDesc')}>
         <SettingItem
           icon={<Heart className="w-5 h-5 text-gray-400" />}
-          title="点赞通知"
-          description="作品收到点赞时通知"
+          title={t('settings.likeNotifications')}
+          description={t('settings.likeNotificationsDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.likeNotifications}
@@ -147,8 +149,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<MessageCircle className="w-5 h-5 text-gray-400" />}
-          title="评论通知"
-          description="作品收到评论时通知"
+          title={t('settings.commentNotifications')}
+          description={t('settings.commentNotificationsDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.commentNotifications}
@@ -160,8 +162,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<UserPlus className="w-5 h-5 text-gray-400" />}
-          title="关注通知"
-          description="有新粉丝时通知"
+          title={t('settings.followNotifications')}
+          description={t('settings.followNotificationsDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.followNotifications}
@@ -173,8 +175,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<MessageCircle className="w-5 h-5 text-gray-400" />}
-          title="私信通知"
-          description="收到私信时通知"
+          title={t('settings.messageNotifications')}
+          description={t('settings.messageNotificationsDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.messageNotifications}
@@ -186,8 +188,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<AtSign className="w-5 h-5 text-gray-400" />}
-          title="@ 提醒"
-          description="被 @ 时通知"
+          title={t('settings.mentionNotifications')}
+          description={t('settings.mentionNotificationsDesc')}
           rightElement={
             <SettingSelect
               value={localSettings.mentionNotifications}
@@ -198,11 +200,11 @@ export const NotificationSettingsPanel = () => {
         />
       </SettingGroup>
 
-      <SettingGroup title="系统通知" description="官方消息和营销内容">
+      <SettingGroup title={t('settings.systemNotificationsTitle')} description={t('settings.systemNotificationsDesc')}>
         <SettingItem
           icon={<AlertCircle className="w-5 h-5 text-gray-400" />}
-          title="系统通知"
-          description="接收系统公告和功能更新"
+          title={t('settings.systemNotifications')}
+          description={t('settings.systemNotificationsDesc2')}
           rightElement={
             <SettingSwitch
               checked={localSettings.systemNotifications}
@@ -213,8 +215,8 @@ export const NotificationSettingsPanel = () => {
 
         <SettingItem
           icon={<Megaphone className="w-5 h-5 text-gray-400" />}
-          title="营销通知"
-          description="接收活动和推广信息"
+          title={t('settings.promotionalNotifications')}
+          description={t('settings.promotionalNotificationsDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.promotionalNotifications}
@@ -224,11 +226,11 @@ export const NotificationSettingsPanel = () => {
         />
       </SettingGroup>
 
-      <SettingGroup title="免打扰设置" description="设置安静时段">
+      <SettingGroup title={t('settings.quietHours')} description={t('settings.quietHoursDesc')}>
         <SettingItem
           icon={<Clock className="w-5 h-5 text-gray-400" />}
-          title="启用免打扰"
-          description="在指定时段静音所有通知"
+          title={t('settings.quietHoursEnable')}
+          description={t('settings.quietHoursEnableDesc')}
           rightElement={
             <SettingSwitch
               checked={localSettings.quietHoursEnabled}
@@ -240,7 +242,7 @@ export const NotificationSettingsPanel = () => {
         {localSettings.quietHoursEnabled && (
           <div className="pt-4 space-y-4">
             <div>
-              <label className="text-gray-400 text-sm mb-2 block">开始时间</label>
+              <label className="text-gray-400 text-sm mb-2 block">{t('settings.startTime')}</label>
               <SettingInput
                 type="time"
                 value={localSettings.quietHoursStart}
@@ -249,7 +251,7 @@ export const NotificationSettingsPanel = () => {
               />
             </div>
             <div>
-              <label className="text-gray-400 text-sm mb-2 block">结束时间</label>
+              <label className="text-gray-400 text-sm mb-2 block">{t('settings.endTime')}</label>
               <SettingInput
                 type="time"
                 value={localSettings.quietHoursEnd}
@@ -269,7 +271,7 @@ export const NotificationSettingsPanel = () => {
                   : 'bg-gray-800 text-gray-500 cursor-not-allowed'
               )}
             >
-              {isSaving ? '保存中...' : '保存免打扰设置'}
+              {isSaving ? t('common.saving') : t('settings.saveQuietHours')}
             </button>
           </div>
         )}
@@ -280,7 +282,7 @@ export const NotificationSettingsPanel = () => {
           'mt-4 p-3 rounded-xl text-sm text-center',
           isSaving ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'
         )}>
-          {isSaving ? '保存中...' : '设置已自动保存'}
+          {isSaving ? t('common.saving') : t('settings.saveSuccess')}
         </div>
       )}
 

@@ -8,11 +8,13 @@ import { MessagesPage } from '@/pages/MessagesPage';
 import { SettingsPage } from '@/pages/settings/SettingsPage';
 import { useMessageWebSocket } from '@/hooks/useMessageWebSocket';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
 function AppRoutes() {
   useMessageWebSocket();
   useTheme();
+  useLanguage();
 
   return (
     <Routes>

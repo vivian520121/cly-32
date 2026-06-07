@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   User,
@@ -10,7 +11,7 @@ import {
   Upload,
   RotateCcw,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { SaveToast } from '@/components/settings/SaveToast';
 import { AccountSettingsPanel } from './panels/AccountSettingsPanel';
@@ -21,21 +22,22 @@ import { AboutPanel } from './panels/AboutPanel';
 import type { SettingsCategory } from '@/types';
 import { cn } from '@/lib/utils';
 
-const categories: { key: SettingsCategory; label: string; icon: React.ReactNode }[] = [
-  { key: 'account', label: '账户管理', icon: <User className="w-5 h-5" /> },
-  { key: 'preferences', label: '偏好设置', icon: <Palette className="w-5 h-5" /> },
-  { key: 'notifications', label: '通知配置', icon: <Bell className="w-5 h-5" /> },
-  { key: 'privacy', label: '隐私与安全', icon: <Shield className="w-5 h-5" /> },
-  { key: 'about', label: '关于', icon: <Info className="w-5 h-5" /> },
-];
-
 export const SettingsPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeCategory, setActiveCategory, saveSuccess, errors, exportSettings, importSettings, resetToDefaults } = useSettingsStore();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [toastMessage, setToastMessage] = useState('');
+
+  const categories = useMemo<{ key: SettingsCategory; label: string; icon: React.ReactNode }[]>(() => [
+    { key: 'account', label: t('settings.account'), icon: <User className="w-5 h-5" /> },
+    { key: 'preferences', label: t('settings.preferences'), icon: <Palette className="w-5 h-5" /> },
+    { key: 'notifications', label: t('settings.notifications'), icon: <Bell className="w-5 h-5" /> },
+    { key: 'privacy', label: t('settings.privacy'), icon: <Shield className="w-5 h-5" /> },
+    { key: 'about', label: t('settings.about'), icon: <Info className="w-5 h-5" /> },
+  ], [t]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setToastType(type);
@@ -57,7 +59,7 @@ export const SettingsPage = () => {
     a.download = `settings-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showNotification('success', '设置已导出');
+    showNotification('success', t('common.success'));
   };
 
   const handleImport = () => {
@@ -72,9 +74,9 @@ export const SettingsPage = () => {
           const content = event.target?.result as string;
           const success = importSettings(content);
           if (success) {
-            showNotification('success', '设置已导入');
+            showNotification('success', t('common.success'));
           } else {
-            showNotification('error', '导入失败，文件格式不正确');
+            showNotification('error', t('validation.importFailed'));
           }
         };
         reader.readAsText(file);
@@ -86,7 +88,7 @@ export const SettingsPage = () => {
   const handleReset = () => {
     resetToDefaults();
     setShowResetConfirm(false);
-    showNotification('success', '已恢复默认设置');
+    showNotification('success', t('common.success'));
   };
 
   const renderPanel = () => {
@@ -109,8 +111,8 @@ export const SettingsPage = () => {
   return (
     <div className="w-full min-h-screen bg-black">
       <SaveToast show={showToast} type={toastType} message={toastMessage} />
-      <SaveToast show={saveSuccess} type="success" message="保存成功" />
-      <SaveToast show={errors.length > 0} type="error" message={errors[0]?.message || '保存失败'} />
+      <SaveToast show={saveSuccess} type="success" message={t('settings.saveSuccess')} />
+      <SaveToast show={errors.length > 0} type="error" message={errors[0]?.message || t('settings.saveFailed')} />
 
       <div className="sticky top-0 z-10 bg-gradient-to-b from-black/80 to-transparent">
         <div className="flex items-center justify-between p-4">
@@ -120,7 +122,7 @@ export const SettingsPage = () => {
           >
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-white font-semibold text-lg">设置</h1>
+          <h1 className="text-white font-semibold text-lg">{t('settings.title')}</h1>
           <div className="w-10" />
         </div>
       </div>
@@ -149,28 +151,28 @@ export const SettingsPage = () => {
           <div className="p-4">{renderPanel()}</div>
 
           <div className="p-4 border-t border-gray-800 mt-8">
-            <h3 className="text-gray-400 text-sm font-medium mb-4">数据管理</h3>
+            <h3 className="text-gray-400 text-sm font-medium mb-4">{t('settings.dataManagement')}</h3>
             <div className="space-y-3">
               <button
                 onClick={handleExport}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/50 rounded-xl text-gray-300 hover:bg-gray-800 transition-colors"
               >
                 <Download className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">导出设置</span>
+                <span className="text-sm">{t('settings.exportSettings')}</span>
               </button>
               <button
                 onClick={handleImport}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-gray-800/50 rounded-xl text-gray-300 hover:bg-gray-800 transition-colors"
               >
                 <Upload className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">导入设置</span>
+                <span className="text-sm">{t('settings.importSettings')}</span>
               </button>
               <button
                 onClick={() => setShowResetConfirm(true)}
                 className="w-full flex items-center gap-3 px-4 py-3 bg-red-500/10 rounded-xl text-red-500 hover:bg-red-500/20 transition-colors"
               >
                 <RotateCcw className="w-5 h-5" />
-                <span className="text-sm">恢复默认设置</span>
+                <span className="text-sm">{t('settings.resetToDefaults')}</span>
               </button>
             </div>
           </div>
@@ -182,21 +184,21 @@ export const SettingsPage = () => {
           <div className="w-[80%] max-w-sm bg-gray-900 rounded-2xl p-6 animate-scale-in">
             <div className="text-center mb-4">
               <RotateCcw className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-              <h3 className="text-white font-semibold text-lg">恢复默认设置？</h3>
-              <p className="text-gray-500 text-sm mt-2">此操作将重置所有设置，无法撤销</p>
+              <h3 className="text-white font-semibold text-lg">{t('settings.resetConfirmTitle')}</h3>
+              <p className="text-gray-500 text-sm mt-2">{t('settings.resetConfirmDesc')}</p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowResetConfirm(false)}
                 className="flex-1 py-3 bg-gray-800 text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
               >
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleReset}
                 className="flex-1 py-3 bg-red-500 text-white text-sm font-medium rounded-xl hover:bg-red-600 transition-colors"
               >
-                确定
+                {t('common.confirm')}
               </button>
             </div>
           </div>
