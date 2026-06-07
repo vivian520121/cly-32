@@ -1,10 +1,80 @@
-import type { UserInteraction, SearchHistoryItem, BrowseHistoryItem } from '../types';
+import type { UserInteraction, SearchHistoryItem, BrowseHistoryItem, Settings, AccountSettings, AppPreferences, NotificationSettings, PrivacySettings, SecuritySettings } from '../types';
 
 const STORAGE_KEY = 'short_video_interaction';
 const SEARCH_HISTORY_KEY = 'short_video_search_history';
 const BROWSE_HISTORY_KEY = 'short_video_browse_history';
+const SETTINGS_KEY = 'short_video_settings';
 const MAX_SEARCH_HISTORY = 20;
 const MAX_BROWSE_HISTORY = 100;
+
+const defaultAccountSettings: AccountSettings = {
+  username: 'user_001',
+  nickname: '短视频用户',
+  bio: '记录美好生活',
+  email: 'user@example.com',
+  phone: '13800138000',
+  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
+};
+
+const defaultAppPreferences: AppPreferences = {
+  theme: 'system',
+  language: 'zh-CN',
+  videoQuality: 'auto',
+  autoPlay: true,
+  autoPlayOnMobile: true,
+  showCaptions: false,
+  volume: 80,
+  playbackSpeed: 1,
+  enableHapticFeedback: true,
+};
+
+const defaultNotificationSettings: NotificationSettings = {
+  pushEnabled: true,
+  emailEnabled: false,
+  smsEnabled: false,
+  likeNotifications: 'always',
+  commentNotifications: 'always',
+  followNotifications: 'always',
+  messageNotifications: 'always',
+  mentionNotifications: 'always',
+  systemNotifications: true,
+  promotionalNotifications: false,
+  quietHoursEnabled: false,
+  quietHoursStart: '22:00',
+  quietHoursEnd: '08:00',
+};
+
+const defaultPrivacySettings: PrivacySettings = {
+  profileVisibility: 'public',
+  videoVisibility: 'public',
+  allowComments: true,
+  allowDuet: true,
+  allowStitch: true,
+  showOnlineStatus: true,
+  showActivityStatus: true,
+  showFollowList: true,
+  showLikeList: false,
+  allowSearchByPhone: false,
+  allowSearchByEmail: false,
+  personalizedRecommendations: true,
+  personalizedAds: true,
+};
+
+const defaultSecuritySettings: SecuritySettings = {
+  twoFactorEnabled: false,
+  loginNotifications: true,
+  sessionTimeout: 7,
+  allowedDevices: [],
+};
+
+export const defaultSettings: Settings = {
+  account: defaultAccountSettings,
+  preferences: defaultAppPreferences,
+  notifications: defaultNotificationSettings,
+  privacy: defaultPrivacySettings,
+  security: defaultSecuritySettings,
+  updatedAt: Date.now(),
+};
 
 const defaultInteraction: UserInteraction = {
   likedVideos: [],
@@ -198,4 +268,70 @@ export const isUserFollowed = (userId: string): boolean => {
 
 export const isCommentLiked = (commentId: string): boolean => {
   return getInteraction().likedComments.includes(commentId);
+};
+
+export const getSettings = (): Settings => {
+  try {
+    const data = localStorage.getItem(SETTINGS_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      return {
+        ...defaultSettings,
+        ...parsed,
+        account: { ...defaultSettings.account, ...parsed.account },
+        preferences: { ...defaultSettings.preferences, ...parsed.preferences },
+        notifications: { ...defaultSettings.notifications, ...parsed.notifications },
+        privacy: { ...defaultSettings.privacy, ...parsed.privacy },
+        security: { ...defaultSettings.security, ...parsed.security },
+      };
+    }
+  } catch (e) {
+    console.error('Failed to get settings from storage', e);
+  }
+  return { ...defaultSettings };
+};
+
+export const saveSettings = (settings: Settings): void => {
+  try {
+    settings.updatedAt = Date.now();
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch (e) {
+    console.error('Failed to save settings to storage', e);
+    throw new Error('Failed to save settings');
+  }
+};
+
+export const resetSettings = (): Settings => {
+  try {
+    localStorage.removeItem(SETTINGS_KEY);
+  } catch (e) {
+    console.error('Failed to reset settings', e);
+  }
+  return { ...defaultSettings };
+};
+
+export const exportSettings = (): string => {
+  const settings = getSettings();
+  return JSON.stringify(settings, null, 2);
+};
+
+export const importSettings = (json: string): Settings | null => {
+  try {
+    const parsed = JSON.parse(json);
+    const merged: Settings = {
+      ...defaultSettings,
+      ...parsed,
+      account: { ...defaultSettings.account, ...parsed.account },
+      preferences: { ...defaultSettings.preferences, ...parsed.preferences },
+      notifications: { ...defaultSettings.notifications, ...parsed.notifications },
+      privacy: { ...defaultSettings.privacy, ...parsed.privacy },
+      security: { ...defaultSettings.security, ...parsed.security },
+      updatedAt: Date.now(),
+    };
+    saveSettings(merged);
+    return merged;
+  } catch (e) {
+    console.error('Failed to import settings', e);
+    return null;
+  }
 };

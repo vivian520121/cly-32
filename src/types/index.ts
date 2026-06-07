@@ -146,3 +146,109 @@ export interface MessageStore extends MessageState {
   getFilteredMessages: () => Message[];
   getUnreadCountByType: (type: MessageType) => number;
 }
+
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type Language = 'zh-CN' | 'en-US' | 'ja-JP';
+export type VideoQuality = 'auto' | '360p' | '480p' | '720p' | '1080p';
+export type NotificationFrequency = 'always' | 'daily' | 'weekly' | 'never';
+
+export interface AccountSettings {
+  username: string;
+  nickname: string;
+  bio: string;
+  email: string;
+  phone: string;
+  avatar: string;
+}
+
+export interface AppPreferences {
+  theme: ThemeMode;
+  language: Language;
+  videoQuality: VideoQuality;
+  autoPlay: boolean;
+  autoPlayOnMobile: boolean;
+  showCaptions: boolean;
+  volume: number;
+  playbackSpeed: number;
+  enableHapticFeedback: boolean;
+}
+
+export interface NotificationSettings {
+  pushEnabled: boolean;
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  likeNotifications: NotificationFrequency;
+  commentNotifications: NotificationFrequency;
+  followNotifications: NotificationFrequency;
+  messageNotifications: NotificationFrequency;
+  mentionNotifications: NotificationFrequency;
+  systemNotifications: boolean;
+  promotionalNotifications: boolean;
+  quietHoursEnabled: boolean;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+}
+
+export interface PrivacySettings {
+  profileVisibility: 'public' | 'followers' | 'private';
+  videoVisibility: 'public' | 'followers' | 'private';
+  allowComments: boolean;
+  allowDuet: boolean;
+  allowStitch: boolean;
+  showOnlineStatus: boolean;
+  showActivityStatus: boolean;
+  showFollowList: boolean;
+  showLikeList: boolean;
+  allowSearchByPhone: boolean;
+  allowSearchByEmail: boolean;
+  personalizedRecommendations: boolean;
+  personalizedAds: boolean;
+}
+
+export interface SecuritySettings {
+  twoFactorEnabled: boolean;
+  loginNotifications: boolean;
+  sessionTimeout: number;
+  allowedDevices: string[];
+}
+
+export interface Settings {
+  account: AccountSettings;
+  preferences: AppPreferences;
+  notifications: NotificationSettings;
+  privacy: PrivacySettings;
+  security: SecuritySettings;
+  updatedAt: number;
+}
+
+export type SettingsCategory = 'account' | 'preferences' | 'notifications' | 'privacy' | 'about';
+
+export interface SettingsValidationError {
+  field: string;
+  message: string;
+}
+
+export interface SettingsState {
+  settings: Settings;
+  isLoading: boolean;
+  isSaving: boolean;
+  errors: SettingsValidationError[];
+  activeCategory: SettingsCategory;
+  saveSuccess: boolean;
+  lastSaved: number | null;
+}
+
+export interface SettingsStore extends SettingsState {
+  initSettings: () => void;
+  updateAccountSettings: (updates: Partial<AccountSettings>) => Promise<boolean>;
+  updatePreferences: (updates: Partial<AppPreferences>) => Promise<boolean>;
+  updateNotificationSettings: (updates: Partial<NotificationSettings>) => Promise<boolean>;
+  updatePrivacySettings: (updates: Partial<PrivacySettings>) => Promise<boolean>;
+  updateSecuritySettings: (updates: Partial<SecuritySettings>) => Promise<boolean>;
+  setActiveCategory: (category: SettingsCategory) => void;
+  validateField: (field: string, value: unknown) => SettingsValidationError | null;
+  clearErrors: () => void;
+  resetToDefaults: () => void;
+  exportSettings: () => string;
+  importSettings: (json: string) => boolean;
+}
